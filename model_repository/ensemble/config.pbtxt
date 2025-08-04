@@ -1,0 +1,107 @@
+name: "ensemble"
+platform: "ensemble"
+max_batch_size: 1
+
+input [
+  {
+    name: "images"
+    data_type: TYPE_FP32
+    dims: [3, 640, 640]
+  }
+]
+
+output [
+  {
+    name: "57"
+    data_type: TYPE_FP32
+    dims: [4, 3]
+  },
+
+  {
+    name: "num_dets"
+    data_type: TYPE_INT32
+    dims: [ 1 ]
+  },
+  {
+    name: "det_boxes"
+    data_type: TYPE_FP32
+    dims: [ 100, 4 ]
+  },
+  {
+    name: "det_scores"
+    data_type: TYPE_FP32
+    dims: [ 100 ]
+  },
+  {
+    name: "det_classes"
+    data_type: TYPE_INT32
+    dims: [ 100 ]
+  }
+
+]
+
+ensemble_scheduling {
+  step [
+    {
+      model_name: "yolov9-c"
+      model_version: -1
+      input_map {
+        key: "images"
+        value: "images"
+      }
+      output_map {
+        key: "num_dets"
+        value: "num_dets"
+      }
+      output_map {
+        key: "det_boxes"
+        value: "det_boxes"
+      }
+      output_map {
+        key: "det_scores"
+        value: "det_scores"
+      }
+      output_map {
+        key: "det_classes"
+        value: "det_classes"
+      }
+    },
+    {
+      model_name: "yolo_postprocessor"
+      model_version: -1
+      input_map {
+        key: "num_dets"
+        value: "num_dets"
+      }
+      input_map {
+        key: "det_boxes"
+        value: "det_boxes"
+      }
+      input_map {
+        key: "det_scores"
+        value: "det_scores"
+      }
+      input_map {
+        key: "det_classes"
+        value: "det_classes"
+      }
+      output_map {
+        key: "onnx::Gemm_0"
+        value: "onnx::Gemm_0"
+      }
+    },
+    {
+      model_name: "flow_network"
+      model_version: -1
+      input_map {
+        key: "onnx::Gemm_0"
+        value: "onnx::Gemm_0"
+      }
+      output_map {
+        key: "57"
+        value: "57"
+      }
+    }
+  ]
+}
+

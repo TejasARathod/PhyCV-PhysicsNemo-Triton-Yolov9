@@ -1,0 +1,26 @@
+defaults :
+  - physicsnemo_default
+  - arch:
+      - fully_connected
+  - scheduler: tf_exponential_lr
+  - optimizer: adam
+  - loss: sum
+  - _self_
+
+scheduler:
+  decay_rate: 0.95
+  decay_steps: 1000
+
+training:
+  rec_inference_freq: 500
+  rec_monitor_freq: 100
+  rec_constraint_freq: 100
+  max_steps: 3000
+
+batch_size:
+  NoSlip: 100
+  Interior: 400
+
+graph:
+  func_arch: false
+
